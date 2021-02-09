@@ -24,7 +24,12 @@ func (a Args) Eq(o Args) error {
 			return fmt.Errorf("different argument %d, got:\n%+v\nand:\n%+v", adx, arg, oarg)
 		}
 		if t.Kind() == reflect.Func {
-			// ignore functions
+			argIsNil := reflect.ValueOf(arg).IsNil()
+			oargIsNil := reflect.ValueOf(oarg).IsNil()
+			if argIsNil != oargIsNil {
+				return fmt.Errorf("different argument %d, got:\n%+v\nand:\n%+v", adx, arg, oarg)
+			}
+			// ignore functions (if both nil or != nil)
 			continue
 		}
 		if t.Kind() != reflect.Slice {

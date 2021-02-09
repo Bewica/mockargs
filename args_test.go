@@ -41,6 +41,12 @@ func TestArgsEq(t *testing.T) {
 			isEq: false,
 		},
 		{name: "func ignored", a1: Args{123, "abc", fmt.Sprintf}, a2: Args{123, "abc", fmt.Sprintf}, isEq: true},
+		{
+			name: "func if not nil",
+			a1:   Args{123, "abc", struct{ fn func() }{fn: func() {}}.fn},
+			a2:   Args{123, "abc", struct{ fn func() }{nil}.fn},
+			isEq: false,
+		},
 	}
 	for idx, test := range table {
 		t.Run(fmt.Sprintf("%d - TestArgsEq: %s", idx, test.name), func(t *testing.T) {
