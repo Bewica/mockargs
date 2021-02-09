@@ -15,7 +15,7 @@ func (c Calls) Eq(o Calls) error {
 	for adx, arg := range c {
 		oarg := o[adx]
 		if err := arg.Eq(oarg); err != nil {
-			return err
+			return fmt.Errorf("different call %d:\n%w", adx, err)
 		}
 	}
 	return nil
