@@ -3,16 +3,28 @@ package mockargs
 import (
 	"fmt"
 	"reflect"
+
+	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 )
 
 // Args is a slice of interface{} that represents
 // any number of args passed into a function
 type Args []interface{}
 
-// Eq defines equality for Args, using reflect package
+// Equal defines equality for Args, using reflect package
 // eventually boils down to reflect.DeepEqual but
 // ignoring reflect.Func type
-func (a Args) Eq(o Args) error {
+func (a Args) Equal(o Args) error {
+	if a == nil && o == nil {
+		return nil
+	}
+	if a == nil {
+		return fmt.Errorf("got\n%+v\nand\n%+v", a, o)
+	}
+	if o == nil {
+		return fmt.Errorf("got\n%+v\nand\n%+v", a, o)
+	}
 	if len(a) != len(o) {
 		return fmt.Errorf("got different number of arguments: %d and %d", len(a), len(o))
 	}
@@ -33,9 +45,13 @@ func (a Args) Eq(o Args) error {
 			continue
 		}
 		if t.Kind() != reflect.Slice {
-			// time comparisons are killing this
-			if !reflect.DeepEqual(arg, oarg) {
-				return fmt.Errorf("different argument %d, got:\n%+v\nand:\n%+v", adx, arg, oarg)
+			var opts cmp.Options
+			if t.Kind() == reflect.Struct {
+				opts = append(opts, cmpopts.IgnoreUnexported(arg))
+			}
+			// TODO: options TIME COMPARE
+			if diff := cmp.Diff(arg, oarg, opts...); diff != "" {
+				return fmt.Errorf(diff)
 			}
 			continue
 		}
@@ -50,7 +66,7 @@ func (a Args) Eq(o Args) error {
 			as[i] = av.Index(i).Interface()
 			os[i] = ov.Index(i).Interface()
 		}
-		if err := Args(as).Eq(Args(os)); err != nil {
+		if err := Args(as).Equal(Args(os)); err != nil {
 			return fmt.Errorf("different argument %d, got:\n%+v\nand:\n%+v\nfrom:\n%w", adx, arg, oarg, err)
 		}
 	}

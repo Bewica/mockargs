@@ -6,15 +6,15 @@ import "fmt"
 // multiple calls to a number of functions
 type Calls []Args
 
-// Eq defines equality for Calls, using reflect package
-// calls Eq for each set of Args
-func (c Calls) Eq(o Calls) error {
+// Equal defines equality for Calls, using reflect package
+// calls Equal for each set of Args
+func (c Calls) Equal(o Calls) error {
 	if len(c) != len(o) {
 		return fmt.Errorf("got different number of calls: %d and %d", len(c), len(o))
 	}
 	for adx, arg := range c {
 		oarg := o[adx]
-		if err := arg.Eq(oarg); err != nil {
+		if err := arg.Equal(oarg); err != nil {
 			return fmt.Errorf("different call %d:\n%w", adx, err)
 		}
 	}
@@ -30,7 +30,7 @@ func (c Calls) In(a Args, start, end int) error {
 	}
 	var s string
 	for _, arg := range c[start:end] {
-		if err := arg.Eq(a); err == nil {
+		if err := arg.Equal(a); err == nil {
 			return nil
 		}
 		s += fmt.Sprintf("\n%+v", arg)

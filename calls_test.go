@@ -12,16 +12,16 @@ func TestCallsEq(t *testing.T) {
 		isEq   bool
 	}{
 		{name: "zero values", isEq: true},
-		{name: "basic Eq", c1: Calls{{123, "abc"}}, c2: Calls{{123, "abc"}}, isEq: true},
-		{name: "basic !Eq", c1: Calls{{123, "abc"}}, c2: Calls{{123, "cde"}}, isEq: false},
-		{name: "different type !Eq", c1: Calls{{123, "abc"}, {456, 789}}, c2: Calls{{123, "cde"}, {456, "cde"}}, isEq: false},
-		{name: "different len !Eq", c1: Calls{{123, "abc"}, {456, 789}}, c2: Calls{{123, "abc"}}, isEq: false},
+		{name: "basic Equal", c1: Calls{{123, "abc"}}, c2: Calls{{123, "abc"}}, isEq: true},
+		{name: "basic !Equal", c1: Calls{{123, "abc"}}, c2: Calls{{123, "cde"}}, isEq: false},
+		{name: "different type !Equal", c1: Calls{{123, "abc"}, {456, 789}}, c2: Calls{{123, "cde"}, {456, "cde"}}, isEq: false},
+		{name: "different len !Equal", c1: Calls{{123, "abc"}, {456, 789}}, c2: Calls{{123, "abc"}}, isEq: false},
 	}
 	for idx, test := range table {
 		t.Run(fmt.Sprintf("%d - TestCallsEq: %s", idx, test.name), func(t *testing.T) {
-			err := test.c1.Eq(test.c2)
+			err := test.c1.Equal(test.c2)
 			if test.isEq != (err == nil) {
-				t.Fatalf("expected Eq to be %t and got: %v", test.isEq, err)
+				t.Fatalf("expected Equal to be %t and got: %v", test.isEq, err)
 			}
 		})
 	}
@@ -69,7 +69,7 @@ func TestCallsIn(t *testing.T) {
 		t.Run(fmt.Sprintf("%d - TestCallsIn: %s", idx, test.name), func(t *testing.T) {
 			err := test.calls.In(test.call, test.idxs[0], test.idxs[1])
 			if test.isIn != (err == nil) {
-				t.Fatalf("expected Eq to be %t and got: %v", test.isIn, err)
+				t.Fatalf("expected Equal to be %t and got: %v", test.isIn, err)
 			}
 		})
 	}
