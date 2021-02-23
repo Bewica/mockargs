@@ -3,6 +3,7 @@ package mockargs
 import (
 	"fmt"
 	"testing"
+	"time"
 )
 
 func TestArgsEq(t *testing.T) {
@@ -45,6 +46,34 @@ func TestArgsEq(t *testing.T) {
 			name: "func if not nil",
 			a1:   Args{123, "abc", struct{ fn func() }{fn: func() {}}.fn},
 			a2:   Args{123, "abc", struct{ fn func() }{nil}.fn},
+			isEq: false,
+		},
+		{
+			name: "deep Equal with Time (1 sec margin)",
+			a1:   Args{123, "abc", Args{123, map[string]interface{}{"key": time.Date(1, 2, 3, 4, 5, 6, 7, time.UTC)}}},
+			a2:   Args{123, "abc", Args{123, map[string]interface{}{"key": time.Date(1, 2, 3, 4, 5, 6, 700, time.UTC)}}},
+			isEq: true,
+		},
+		{
+			name: "deep !Equal with Time (1 sec margin)",
+			a1:   Args{123, "abc", Args{123, map[string]interface{}{"key": time.Date(1, 2, 3, 4, 5, 6, 7, time.UTC)}}},
+			a2:   Args{123, "abc", Args{123, map[string]interface{}{"key": time.Date(1, 2, 3, 4, 5, 7, 8, time.UTC)}}},
+			isEq: false,
+		},
+		{name: "floats Equal", a1: Args{1.23}, a2: Args{1.234}, isEq: true},
+		{name: "floats !Equal", a1: Args{1.23}, a2: Args{1.25}, isEq: false},
+		{name: "floats Equal fraction", a1: Args{123.0}, a2: Args{123.05}, isEq: true},
+		{name: "floats !Equal fraction", a1: Args{123.0}, a2: Args{123.1}, isEq: false},
+		{
+			name: "maps Equal",
+			a1:   Args{map[string]interface{}{"abc": 12, "cde": 34, "fgh": 56}},
+			a2:   Args{map[string]interface{}{"abc": 12, "cde": 34, "fgh": 56}},
+			isEq: true,
+		},
+		{
+			name: "maps !Equal",
+			a1:   Args{map[string]interface{}{"abc": 12, "cde": 34, "fgh": 56}},
+			a2:   Args{map[string]interface{}{"abc": 12, "cde": 43, "fgh": 56}},
 			isEq: false,
 		},
 	}

@@ -3,6 +3,7 @@ package mockargs
 import (
 	"fmt"
 	"reflect"
+	"time"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
@@ -45,11 +46,10 @@ func (a Args) Equal(o Args) error {
 			continue
 		}
 		if t.Kind() != reflect.Slice {
-			var opts cmp.Options
+			opts := cmp.Options{cmpopts.EquateApproxTime(1 * time.Second), cmpopts.EquateApprox(5e-4, 0.005)}
 			if t.Kind() == reflect.Struct {
 				opts = append(opts, cmpopts.IgnoreUnexported(arg))
 			}
-			// TODO: options TIME COMPARE
 			if diff := cmp.Diff(arg, oarg, opts...); diff != "" {
 				return fmt.Errorf(diff)
 			}
