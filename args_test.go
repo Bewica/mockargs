@@ -57,7 +57,7 @@ func TestArgsEq(t *testing.T) {
 		{
 			name: "deep !Equal with Time (1 sec margin)",
 			a1:   Args{123, "abc", Args{123, map[string]interface{}{"key": time.Date(1, 2, 3, 4, 5, 6, 7, time.UTC)}}},
-			a2:   Args{123, "abc", Args{123, map[string]interface{}{"key": time.Date(1, 2, 3, 4, 5, 7, 8, time.UTC)}}},
+			a2:   Args{123, "abc", Args{123, map[string]interface{}{"key": time.Date(1, 2, 3, 4, 5, 11, 8, time.UTC)}}},
 			isEq: false,
 		},
 		{name: "floats Equal", a1: Args{1.23}, a2: Args{1.234}, isEq: true},

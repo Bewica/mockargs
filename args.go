@@ -46,12 +46,12 @@ func (a Args) Equal(o Args) error {
 			continue
 		}
 		if t.Kind() != reflect.Slice {
-			opts := cmp.Options{cmpopts.EquateApproxTime(1 * time.Second), cmpopts.EquateApprox(5e-4, 0.005)}
+			opts := cmp.Options{cmpopts.EquateApproxTime(5 * time.Second), cmpopts.EquateApprox(5e-4, 0.005)}
 			if t.Kind() == reflect.Struct {
 				opts = append(opts, cmpopts.IgnoreUnexported(arg))
 			}
 			if diff := cmp.Diff(arg, oarg, opts...); diff != "" {
-				return fmt.Errorf(diff)
+				return fmt.Errorf("different argument %d:\n%s", adx, diff)
 			}
 			continue
 		}
