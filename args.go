@@ -16,7 +16,7 @@ type Args []interface{}
 // Equal defines equality for Args, using reflect package
 // eventually boils down to reflect.DeepEqual but
 // ignoring reflect.Func type
-func (a Args) Equal(o Args) error {
+func (a Args) Equal(o Args, opts ...cmp.Option) error {
 	if a == nil && o == nil {
 		return nil
 	}
@@ -46,7 +46,9 @@ func (a Args) Equal(o Args) error {
 			continue
 		}
 		if t.Kind() != reflect.Slice {
-			opts := cmp.Options{cmpopts.EquateApproxTime(5 * time.Second), cmpopts.EquateApprox(5e-4, 0.005)}
+			if opts == nil {
+				opts = cmp.Options{cmpopts.EquateApproxTime(5 * time.Second), cmpopts.EquateApprox(5e-4, 0.005)}
+			}
 			if t.Kind() == reflect.Struct {
 				opts = append(opts, cmpopts.IgnoreUnexported(arg))
 			}

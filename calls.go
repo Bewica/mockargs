@@ -1,6 +1,10 @@
 package mockargs
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/google/go-cmp/cmp"
+)
 
 // Calls is a slice of Args that represents
 // multiple calls to a number of functions
@@ -8,13 +12,13 @@ type Calls []Args
 
 // Equal defines equality for Calls, using reflect package
 // calls Equal for each set of Args
-func (c Calls) Equal(o Calls) error {
+func (c Calls) Equal(o Calls, opts ...cmp.Option) error {
 	if len(c) != len(o) {
 		return fmt.Errorf("got different number of calls: %d and %d", len(c), len(o))
 	}
 	for adx, arg := range c {
 		oarg := o[adx]
-		if err := arg.Equal(oarg); err != nil {
+		if err := arg.Equal(oarg, opts...); err != nil {
 			return fmt.Errorf("different call %d:\n%w", adx, err)
 		}
 	}
