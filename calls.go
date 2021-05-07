@@ -13,14 +13,11 @@ type Calls []Args
 // Equal defines equality for Calls, using reflect package
 // calls Equal for each set of Args
 func (c Calls) Equal(o Calls, opts ...cmp.Option) error {
-	if len(c) != len(o) {
-		return fmt.Errorf("got different number of calls: %d and %d", len(c), len(o))
+	if len(opts) < 1 {
+		opts = defaultArguments(c)
 	}
-	for adx, arg := range c {
-		oarg := o[adx]
-		if err := arg.Equal(oarg, opts...); err != nil {
-			return fmt.Errorf("different call %d:\n%w", adx, err)
-		}
+	if diff := cmp.Diff(c, o, opts...); diff != "" {
+		return fmt.Errorf(diff)
 	}
 	return nil
 }

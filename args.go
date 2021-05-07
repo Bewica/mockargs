@@ -13,6 +13,44 @@ import (
 // any number of args passed into a function
 type Args []interface{}
 
+func defaultArguments(v interface{}) cmp.Options {
+	opts := cmp.Options{
+		cmpopts.EquateEmpty(),
+		cmpopts.EquateApprox(5e-4, 0.005),
+		cmpopts.EquateApproxTime(time.Second),
+		cmpopts.IgnoreTypes(),
+	}
+	unexporteds := make(map[string]cmp.Option)
+	unexporteds = ignoreUnexporteds(unexporteds, v)
+	for _, opt := range unexporteds {
+		opts = append(opts, opt)
+	}
+	return opts
+}
+
+func ignoreUnexporteds(uniqueIgnores map[string]cmp.Option, v interface{}) map[string]cmp.Option {
+	t := reflect.TypeOf(v)
+	kind := t.Kind()
+	if kind == reflect.Struct {
+		uniqueIgnores[t.PkgPath()+t.Name()] = cmpopts.IgnoreUnexported(v)
+		return uniqueIgnores
+	}
+	if kind == reflect.Func {
+		uniqueIgnores[t.PkgPath()+t.Name()] = cmpopts.IgnoreTypes(v)
+		return uniqueIgnores
+	}
+	if kind != reflect.Slice {
+		return uniqueIgnores
+	}
+	av := reflect.ValueOf(v)
+	l := av.Len()
+	for i := 0; i < l; i++ {
+		iv := av.Index(i).Interface()
+		uniqueIgnores = ignoreUnexporteds(uniqueIgnores, iv)
+	}
+	return uniqueIgnores
+}
+
 // Equal defines equality for Args, using reflect package
 // eventually boils down to reflect.DeepEqual but
 // ignoring reflect.Func type
@@ -20,57 +58,11 @@ func (a Args) Equal(o Args, opts ...cmp.Option) error {
 	if a == nil && o == nil {
 		return nil
 	}
-	if a == nil {
-		return fmt.Errorf("got\n%+v\nand\n%+v", a, o)
+	if len(opts) < 1 {
+		opts = defaultArguments(a)
 	}
-	if o == nil {
-		return fmt.Errorf("got\n%+v\nand\n%+v", a, o)
-	}
-	if len(a) != len(o) {
-		return fmt.Errorf("got different number of arguments: %d and %d", len(a), len(o))
-	}
-	for adx, arg := range a {
-		oarg := o[adx]
-		t := reflect.TypeOf(arg)
-		ot := reflect.TypeOf(oarg)
-		if t != ot {
-			return fmt.Errorf("different argument %d, got:\n%+v\nand:\n%+v", adx, arg, oarg)
-		}
-		if t.Kind() == reflect.Func {
-			argIsNil := reflect.ValueOf(arg).IsNil()
-			oargIsNil := reflect.ValueOf(oarg).IsNil()
-			if argIsNil != oargIsNil {
-				return fmt.Errorf("different argument %d, got:\n%+v\nand:\n%+v", adx, arg, oarg)
-			}
-			// ignore functions (if both nil or != nil)
-			continue
-		}
-		if t.Kind() != reflect.Slice {
-			if opts == nil {
-				opts = cmp.Options{cmpopts.EquateApproxTime(5 * time.Second), cmpopts.EquateApprox(5e-4, 0.005)}
-			}
-			if t.Kind() == reflect.Struct {
-				opts = append(opts, cmpopts.IgnoreUnexported(arg))
-			}
-			if diff := cmp.Diff(arg, oarg, opts...); diff != "" {
-				return fmt.Errorf("different argument %d:\n%s", adx, diff)
-			}
-			continue
-		}
-		av := reflect.ValueOf(arg)
-		ov := reflect.ValueOf(oarg)
-		if av.Len() != ov.Len() {
-			return fmt.Errorf("different argument %d, got:\n%+v\nand:\n%+v", adx, arg, oarg)
-		}
-		as := make([]interface{}, av.Len())
-		os := make([]interface{}, ov.Len())
-		for i := 0; i < av.Len(); i++ {
-			as[i] = av.Index(i).Interface()
-			os[i] = ov.Index(i).Interface()
-		}
-		if err := Args(as).Equal(Args(os)); err != nil {
-			return fmt.Errorf("different argument %d, got:\n%+v\nand:\n%+v\nfrom:\n%w", adx, arg, oarg, err)
-		}
+	if diff := cmp.Diff(a, o, opts...); diff != "" {
+		return fmt.Errorf(diff)
 	}
 	return nil
 }

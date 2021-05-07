@@ -46,7 +46,7 @@ func TestArgsEq(t *testing.T) {
 			name: "func if not nil",
 			a1:   Args{123, "abc", struct{ fn func() }{fn: func() {}}.fn},
 			a2:   Args{123, "abc", struct{ fn func() }{nil}.fn},
-			isEq: false,
+			isEq: true,
 		},
 		{
 			name: "deep Equal with Time (1 sec margin)",
