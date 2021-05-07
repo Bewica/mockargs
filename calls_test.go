@@ -16,6 +16,8 @@ func TestCallsEq(t *testing.T) {
 		{name: "basic !Equal", c1: Calls{{123, "abc"}}, c2: Calls{{123, "cde"}}, isEq: false},
 		{name: "different type !Equal", c1: Calls{{123, "abc"}, {456, 789}}, c2: Calls{{123, "cde"}, {456, "cde"}}, isEq: false},
 		{name: "different len !Equal", c1: Calls{{123, "abc"}, {456, 789}}, c2: Calls{{123, "abc"}}, isEq: false},
+		{name: "1st calls nil", c1: nil, c2: Calls{{123, "abc"}}, isEq: false},
+		{name: "2nd calls nil", c1: Calls{{123, "abc"}}, c2: nil, isEq: false},
 	}
 	for idx, test := range table {
 		t.Run(fmt.Sprintf("%d - TestCallsEq: %s", idx, test.name), func(t *testing.T) {

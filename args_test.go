@@ -76,6 +76,9 @@ func TestArgsEq(t *testing.T) {
 			a2:   Args{map[string]interface{}{"abc": 12, "cde": 43, "fgh": 56}},
 			isEq: false,
 		},
+		{name: "1st arg is nil", a1: nil, a2: Args{123, "abc"}, isEq: false},
+		{name: "2nd arg is nil", a1: Args{123, "abc"}, a2: nil, isEq: false},
+		{name: "nil in slices", a1: Args{[]interface{}{1, 2, nil}}, a2: Args{123, "abc"}, isEq: false},
 	}
 	for idx, test := range table {
 		t.Run(fmt.Sprintf("%d - TestArgsEq: %s", idx, test.name), func(t *testing.T) {

@@ -29,6 +29,9 @@ func defaultArguments(v interface{}) cmp.Options {
 }
 
 func ignoreUnexporteds(uniqueIgnores map[string]cmp.Option, v interface{}) map[string]cmp.Option {
+	if v == nil {
+		return uniqueIgnores
+	}
 	t := reflect.TypeOf(v)
 	kind := t.Kind()
 	if kind == reflect.Struct {
