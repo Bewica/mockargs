@@ -13,6 +13,9 @@ type Calls []Args
 // Equal defines equality for Calls, using reflect package
 // calls Equal for each set of Args
 func (c Calls) Equal(o Calls, opts ...cmp.Option) error {
+	if c == nil && o == nil {
+		return nil
+	}
 	if len(opts) < 1 {
 		opts = defaultArguments(c)
 	}
