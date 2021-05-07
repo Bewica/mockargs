@@ -17,7 +17,11 @@ func (c Calls) Equal(o Calls, opts ...cmp.Option) error {
 		return nil
 	}
 	if len(opts) < 1 {
-		opts = defaultArguments(c)
+		v := c
+		if c == nil {
+			v = o
+		}
+		opts = defaultArguments(v)
 	}
 	if diff := cmp.Diff(c, o, opts...); diff != "" {
 		return fmt.Errorf(diff)

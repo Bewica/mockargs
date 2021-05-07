@@ -59,7 +59,11 @@ func (a Args) Equal(o Args, opts ...cmp.Option) error {
 		return nil
 	}
 	if len(opts) < 1 {
-		opts = defaultArguments(a)
+		v := a
+		if a == nil {
+			v = o
+		}
+		opts = defaultArguments(v)
 	}
 	if diff := cmp.Diff(a, o, opts...); diff != "" {
 		return fmt.Errorf(diff)
